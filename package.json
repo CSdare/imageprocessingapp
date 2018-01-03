@@ -1,0 +1,19 @@
+{
+  "name": "imageprocessingapp",
+  "version": "1.0.0",
+  "description": "process images with multi threading",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CSdare/imageprocessingapp.git"
+  },
+  "author": "team dare",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CSdare/imageprocessingapp/issues"
+  },
+  "homepage": "https://github.com/CSdare/imageprocessingapp#readme"
+}
