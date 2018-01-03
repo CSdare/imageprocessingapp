@@ -1,3 +1,5 @@
 node_modules
+.env
 build/*.js
 .DS_Store
+
