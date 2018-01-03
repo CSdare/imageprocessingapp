@@ -4,7 +4,8 @@
   "description": "process images with multi threading",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "start": "node server/server.js"
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,11 @@
   "bugs": {
     "url": "https://github.com/CSdare/imageprocessingapp/issues"
   },
-  "homepage": "https://github.com/CSdare/imageprocessingapp#readme"
+  "homepage": "https://github.com/CSdare/imageprocessingapp#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "dotenv": "^4.0.0",
+    "express": "^4.16.2",
+    "mongoose": "^5.0.0-rc1"
+  }
 }
