@@ -24,7 +24,8 @@
     "express": "^4.16.2",
     "mongoose": "^5.0.0-rc1",
     "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "react-dom": "^16.2.0",
+    "systeminformation": "^3.33.12"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
