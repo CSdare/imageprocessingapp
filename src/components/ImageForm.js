@@ -23,7 +23,7 @@ class ImageForm extends React.Component {
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
+      <form className="image-form" onSubmit={this.handleSubmit}>
         <label htmlFor="image-url">Image URL</label>
         <input  
           name="image-url" 
