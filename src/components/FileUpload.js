@@ -1,6 +1,6 @@
 import React from 'react';
 
-class ImageForm extends React.Component {
+class FileUpload extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -31,11 +31,10 @@ class ImageForm extends React.Component {
           onChange={this.handleChange}
           ref={(input) => {this.input = input}}
         />
-        <label htmlFor="">Upload File</label>
         <button type="submit">Add Image</button>
       </form>
     );
   }
 }
 
-export default ImageForm;
+export default FileUpload;

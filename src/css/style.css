@@ -4,6 +4,28 @@ body {
   font-family: 'Helvetica Neue', sans-serif;
 }
 
+.image-form,
+h1 {
+  padding-left: 10px;
+}
+
+.image-form {
+  background-color: lightgray;
+}
+
+.image-form input {
+  margin: 6px;
+  width: 50%;
+  max-width: 500px;
+}
+
+.image-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 4px;
+}
+
 .image img {
-  max-height: 100px;
+  margin: 4px;
+  max-height: 150px;
 }
