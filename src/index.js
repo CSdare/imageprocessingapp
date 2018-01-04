@@ -22,9 +22,10 @@ if ('serviceWorker' in navigator) {
 
 // might need to wrap entire webWorker section in 'if (window.Worker)' block
 const webWorker = new Worker('/../workers/webWorker.js');
+console.log('webWorker is active!')
 
-webWorker.onmessage = e => console.log('message from webWorker: ', e.data);
-webWorker.onerror = err => console.log('webWorker error: ', err);
+webWorker.onmessage = e => console.log('message from webWorker:', e.data);
+webWorker.onerror = err => console.log('webWorker error:', err);
 
 webWorker.postMessage('wrong');
 webWorker.postMessage('not');
@@ -32,4 +33,4 @@ webWorker.postMessage('ha');
 webWorker.postMessage('correct');
 
 
-console.log(webWorker);
+// console.log(webWorker);
