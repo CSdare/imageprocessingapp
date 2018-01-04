@@ -32,9 +32,11 @@ class App extends React.Component {
       });
   }
 
+
   componentDidMount() {
     this.getImagesFromDB();
-  }
+    console.log(navigator.userAgent); 
+   }
 
   render() {
     return (
