@@ -51,7 +51,7 @@ class App extends React.Component {
       <div className="container">
         <h1>D.A.R.E. Images</h1>
         <URLForm addImage={this.addImageToDB} />
-        <FileUpload addImage={this.addLocalImage} />
+        <FileUpload addImage={this.addImageToDB} />
         <ImagesContainer images={this.state.images} />
       </div>
     );

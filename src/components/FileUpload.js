@@ -19,8 +19,8 @@ class FileUpload extends React.Component {
     e.preventDefault();
     const reader = new FileReader();
     reader.onload = (event) => {
-      this.props.addImage(event.target.result, this.state.localFileID);
-      this.setState({ localFileID: ++this.state.localFileID })
+      this.props.addImage(event.target.result);
+      // this.setState({ localFileID: ++this.state.localFileID })
     };
     reader.readAsDataURL(this.state.files[0]);
   }
