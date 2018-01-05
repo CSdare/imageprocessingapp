@@ -37,7 +37,7 @@ class App extends React.Component {
   processImages() {
     let imageNum = 0;
     while (imageNum < this.state.images.length) {
-      fetch(`/process/${this.state.images[i]._id}`)
+      fetch(`/process/${this.state.images[imageNum]._id}`)
         .then(res => res.json())
         .then(data => {
           console.log(data)

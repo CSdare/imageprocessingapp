@@ -17,12 +17,9 @@ const getImages = (req, res) => {
 }
 
 const processImages = (req, res) => {
-  Image.find((err, images) => {
-    if (err) throw err;
-    let result = images.map((elem) => elem._id)
-    res.json(result)
-
-  });
+  Image.findOne({ _id: req.params.id }, (err, image) => {
+    console.log(image.url)
+  })
 }
 
 module.exports = { addImage, getImages, processImages, }
