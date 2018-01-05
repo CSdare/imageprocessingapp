@@ -35,13 +35,16 @@ class App extends React.Component {
   }
 
   processImages() {
-    this.state.images.forEach(image => {
-      fetch(`/process/${image._id}`)
+    let imageNum = 0;
+    while (imageNum < this.state.images.length) {
+      fetch(`/process/${this.state.images[i]._id}`)
         .then(res => res.json())
-        .then(data => console.log(data))
+        .then(data => {
+          console.log(data)
+          imageNum++;
+        })
         .catch(err => console.error('Error requesting image processing:', err));
-    });
-    
+    } 
   }
 
   componentDidMount() {
