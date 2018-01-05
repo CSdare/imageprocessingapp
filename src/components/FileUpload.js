@@ -4,33 +4,32 @@ class FileUpload extends React.Component {
   constructor() {
     super();
     this.state = {
-      value: ''
+      files: [],
+      localFileID: 0
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   handleChange(e) {
-    this.setState({ value: e.target.value });
+    this.setState({ files: e.target.files });
   }
 
   handleSubmit(e) {
     e.preventDefault();
-    this.props.addImage(this.state.value);
-    this.setState({ value: '' });
-    this.input.value = '';
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      this.props.addImage(event.target.result, this.state.localFileID);
+      this.setState({ localFileID: ++this.state.localFileID })
+    };
+    reader.readAsDataURL(this.state.files[0]);
   }
 
   render() {
     return (
-      <form className="image-form" onSubmit={this.handleSubmit}>
-        <label htmlFor="image-url">Image URL</label>
-        <input  
-          name="image-url" 
-          type="text"
-          onChange={this.handleChange}
-          ref={(input) => {this.input = input}}
-        />
+      <form className="file-form" onSubmit={this.handleSubmit}>
+        <label htmlFor="file">Upload Image</label>
+        <input type="file" id="file" onChange={this.handleChange} name="file" />
         <button type="submit">Add Image</button>
       </form>
     );
