@@ -7,6 +7,23 @@
   <title>DARE Images</title>
 </head>
 <body>
+  <button type="button" id="getCache">log the cache</button>
+  <button type="button" id="switch" class="workerThread">switch to single thread</button>
+  <button type="button" id="fib">process Fibonaccis</button>
+  <script>
+    // click handler to print the v1 cache to the console
+    document.getElementById('getCache').addEventListener('click', () => {
+      caches.open('v1')
+      .then(cache => cache.keys())
+      .then(keys => {
+        keys.forEach(key => {
+          console.log('key: ', key)
+          caches.match(key)
+          .then(match => console.log(match))
+        })
+      });
+    });
+  </script>
   <div id="root"></div>
   <script src="build/bundle.js"></script>
 </body>
