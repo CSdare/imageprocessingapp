@@ -1,5 +1,6 @@
 import React from 'react';
-import ImageForm from './ImageForm'
+import URLForm from './URLForm';
+import FileUpload from './FileUpload';
 import ImagesContainer from './ImagesContainer';
 
 class App extends React.Component {
@@ -10,6 +11,7 @@ class App extends React.Component {
     };
     this.getImagesFromDB = this.getImagesFromDB.bind(this);
     this.addImageToDB = this.addImageToDB.bind(this);
+    this.addLocalImage = this.addLocalImage.bind(this);
   }
 
   getImagesFromDB() {
@@ -20,16 +22,23 @@ class App extends React.Component {
   }
 
   addImageToDB(url) {
-    const imageToAdd = { url: url };
+    const imageToAdd = { url };
     fetch('/create', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(imageToAdd)
     }).then(res => res.json())
       .then((data) => {
-        console.log(data);
         this.setState({ images: [...this.state.images, data] });
       });
+  }
+
+  addLocalImage(data, id) {
+    const image = {
+      _id: id,
+      url: data
+    };
+    this.setState({ images: [...this.state.images, image] })
   }
 
   componentDidMount() {
@@ -40,7 +49,8 @@ class App extends React.Component {
     return (
       <div className="container">
         <h1>D.A.R.E. Images</h1>
-        <ImageForm addImage={this.addImageToDB} />
+        <URLForm addImage={this.addImageToDB} />
+        <FileUpload addImage={this.addLocalImage} />
         <ImagesContainer images={this.state.images} />
       </div>
     );
