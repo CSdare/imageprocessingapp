@@ -6,6 +6,7 @@ body {
 
 .image-form,
 .file-form,
+.process,
 h1 {
   padding-left: 10px;
 }
@@ -16,6 +17,11 @@ h1 {
 
 .file-form {
   background-color: lightblue;
+}
+
+.process {
+  background-color: lightgreen;
+  padding: 6px;
 }
 
 .image-form input,
