@@ -1,6 +1,7 @@
 import React from 'react';
 import URLForm from './URLForm';
 import FileUpload from './FileUpload';
+import Process from './Process';
 import ImagesContainer from './ImagesContainer';
 
 class App extends React.Component {
@@ -11,7 +12,7 @@ class App extends React.Component {
     };
     this.getImagesFromDB = this.getImagesFromDB.bind(this);
     this.addImageToDB = this.addImageToDB.bind(this);
-    this.addLocalImage = this.addLocalImage.bind(this);
+    this.processImages = this.processImages.bind(this);
   }
 
   getImagesFromDB() {
@@ -33,12 +34,14 @@ class App extends React.Component {
       });
   }
 
-  addLocalImage(data, id) {
-    const image = {
-      _id: id,
-      url: data
-    };
-    this.setState({ images: [...this.state.images, image] })
+  processImages() {
+    this.state.images.forEach(image => {
+      fetch(`/process/${image._id}`)
+        .then(res => res.json())
+        .then(data => console.log(data))
+        .catch(err => console.error('Error requesting image processing:', err));
+    });
+    
   }
 
   componentDidMount() {
@@ -52,6 +55,7 @@ class App extends React.Component {
         <h1>D.A.R.E. Images</h1>
         <URLForm addImage={this.addImageToDB} />
         <FileUpload addImage={this.addImageToDB} />
+        <Process processImages={this.processImages} />
         <ImagesContainer images={this.state.images} />
       </div>
     );
