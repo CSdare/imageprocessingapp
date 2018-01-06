@@ -23,8 +23,12 @@ const nthFib = num => {
 }
 
 // sends fibonacci answer back to index.js
+// NOTE - attempted to send callback in as part of postMessage, but unable to send functions 
+// with postMessage API because they are non-serializable
 
 onmessage = e => {
-  const message = nthFib(e.data);
-  postMessage(`worker threads: Fib #${e.data} is ${message}`);
+  const callback = nthFib;
+  const args = e.data.arguments;
+  const output = callback(...args);
+  postMessage(`worker threads:\ninput: ${args}\noutput:${output}`);
 }
