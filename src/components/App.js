@@ -4,6 +4,8 @@ import FileUpload from './FileUpload';
 import Process from './Process';
 import ImagesContainer from './ImagesContainer';
 
+const imageUrls = [];
+
 class App extends React.Component {
   constructor() {
     super();
@@ -35,16 +37,12 @@ class App extends React.Component {
   }
 
   processImages() {
-    let imageNum = 0;
-    while (imageNum < this.state.images.length) {
-      fetch(`/process/${this.state.images[imageNum]._id}`)
-        .then(res => res.json())
-        .then(data => {
-          console.log(data)
-          imageNum++;
-        })
-        .catch(err => console.error('Error requesting image processing:', err));
-    } 
+    const promises = this.state.images.map(image => {
+      fetch(`/process/${image._id}`)
+      .then(res => res.json())
+      .then(data => imageUrls.push(data))
+    })
+    Promise.all(promises).then(() => console.log(imageUrls)); 
   }
 
   componentDidMount() {
