@@ -2,12 +2,14 @@ import React from 'react';
 import { render } from 'react-dom';
 import App from './components/App';
 import styles from './css/style.css';
+import runtime from 'serviceworker-webpack-plugin/lib/runtime';
+import Worker from 'worker-loader!../workers/webWorker.js';
 
 render(<App />, document.getElementById('root'));
 
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/../workers/serviceWorker.js').then(reg => {
+  runtime.register().then(reg => {
     if (reg.installing) {
       console.log('Service worker installing');
     } else if (reg.waiting) {
@@ -26,12 +28,12 @@ if ('serviceWorker' in navigator) {
 
 const createAndDispatchWorkers = () => {
   for (let i = 1; i <= 7; i++) {
-    let webWorker = new Worker('/../workers/webWorker.js');
-    webWorker.onmessage = e => console.log('from webWorker:', e.data);
+    let webWorker = new Worker;
+    webWorker.onmessage = e => console.log(e.data);
     webWorker.onerror = err => console.log('webWorker error:', err);
-    webWorker.postMessage(i + 28);
-    webWorker.postMessage(i + 35);
-    webWorker.postMessage(i + 42);
+    webWorker.postMessage({ arguments: [i + 28] });
+    webWorker.postMessage({ arguments: [i + 35] });
+    webWorker.postMessage({ arguments: [i + 42] });
   }
 }
 
@@ -42,6 +44,14 @@ const nthFib = num => {
   if (num === 1) return 1;
   return nthFib(num - 1) + nthFib(num - 2);
 }
+
+// using worker-loader module to include workers in bundle.js
+// const worker = new Worker;
+// worker.onmessage = e => {
+//   console.log(e.data);
+// }
+
+// worker.postMessage({ arguments: [20] });
 
 // has main thread calculate fib numbers 29-49 without cache
 
