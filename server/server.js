@@ -8,7 +8,7 @@ const imageController = require('./db/imageController');
 const port = 4000;
 const app = express();
 
-app.use(express.static(__dirname + '/../')); // do we need this? all static files should be bundled
+app.use(express.static(__dirname + '/../build/')); // do we need this? all static files should be bundled
 app.use(bodyParser.json({ limit: '16mb' }));
 app.use(bodyParser.urlencoded({ limit: '16mb', extended: true }));
 
