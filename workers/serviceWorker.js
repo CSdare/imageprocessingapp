@@ -43,6 +43,7 @@ self.addEventListener('activate', event => {
   );
 });
 
+
 // respond to fetch requests
 self.addEventListener('fetch', event => {
   const request = event.request;
@@ -57,13 +58,16 @@ self.addEventListener('fetch', event => {
     if (DEBUG) console.log(`SW Ignore different origin ${requestUrl.origin}`);
     return;
   }
+  // Checks cache for a matching request. 
   const resource = global.caches.match(request).then(response => {
+    // If found set response (aka resource) to the cached response.
     if (response) {
       if (DEBUG) console.log(`[SW] fetch URL ${requestUrl.href} from cache`);
       return response;
     }
-    //Load and cache known assets
+    // If request is not found in cache relay the request and cache the response 
     return fetch(request)
+      // responseNetwork is simply a posh word for response to a GET request
       .then(responseNetwork => {
         if (DEBUG) console.log('responseNetwork is ', responseNetwork);
         if (!responseNetwork || !responseNetwork.ok) {
