@@ -4,7 +4,7 @@ import FileUpload from './FileUpload';
 import Process from './Process';
 import ImagesContainer from './ImagesContainer';
 
-const imageUrls = [];
+const svgData = [];
 
 class App extends React.Component {
   constructor() {
@@ -37,12 +37,20 @@ class App extends React.Component {
   }
 
   processImages() {
-    const promises = this.state.images.map(image => {
+    this.state.images.forEach(image => {
       fetch(`/process/${image._id}`)
       .then(res => res.json())
-      .then(data => imageUrls.push(data))
-    })
-    Promise.all(promises).then(() => console.log(imageUrls)); 
+      .then(svg => {
+        const base64 = 'data:image/svg+xml;base64,' + window.btoa(svg.data);
+        this.setState((prevState) => {
+          const index = prevState.images.findIndex(image => image._id === svg.id);
+          const images = prevState.images.slice();
+          images.splice(index, 1, { _id: svg.id, url: base64 })
+          return { images };
+        });
+      })
+      .catch(err => console.error('Error convering image:', err));
+    });
   }
 
   componentDidMount() {
