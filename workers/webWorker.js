@@ -13,7 +13,6 @@ const nthFib = num => {
   }
 }
 */
-
 // version of Fib without storage - makes for longer run time
 
 const nthFib = num => {

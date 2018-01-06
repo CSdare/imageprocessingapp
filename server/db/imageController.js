@@ -19,7 +19,6 @@ const getImages = (req, res) => {
 const processImages = (req, res) => {
   Image.findOne({ _id: req.params.id }, (err, image) => {
     potrace.trace(image.url, (err, svg) => {
-      console.log('SVG Callback')
       if (err) throw(err);
       res.json({ id: image._id, data: svg });
     });
