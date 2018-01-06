@@ -4,8 +4,6 @@ import FileUpload from './FileUpload';
 import Process from './Process';
 import ImagesContainer from './ImagesContainer';
 
-const svgData = [];
-
 class App extends React.Component {
   constructor() {
     super();
