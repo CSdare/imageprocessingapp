@@ -8,7 +8,8 @@ console.log(arguments[0])
 console.log(arguments[1])
 p.trace(file, {threshold: threshold}, function(err, svg) {
     if (err) throw err;
-    fs.writeFileSync(outputFile, svg);
+    return svg;
+    // fs.writeFileSync(outputFile, svg);
   });
 }
 
