@@ -5,6 +5,8 @@ import styles from './css/style.css';
 import runtime from 'serviceworker-webpack-plugin/lib/runtime';
 import Worker from 'worker-loader!../workers/webWorker.js';
 
+window.Buffer = Buffer;
+
 render(<App />, document.getElementById('root'));
 
 
