@@ -4,6 +4,7 @@ const Process = (props) => {
   return (
     <div className="process">
       <button onClick={props.processImages}>Process Images</button>
+      <button onClick={props.processImagesWorker}>Worker Process Images</button>
     </div>
   );
 };

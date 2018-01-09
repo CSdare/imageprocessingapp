@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Image = require('./mongodb').Image;
-const potrace = require('potrace');
+const { makeSVG } = require('../../functions/makeSVG')
 
 const addImage = (req, res) => {
   Image.create({ url: req.body.url }, (err, image) => {
@@ -18,11 +18,11 @@ const getImages = (req, res) => {
 
 const processImages = (req, res) => {
   Image.findOne({ _id: req.params.id }, (err, image) => {
-    potrace.trace(image.url, (err, svg) => {
-      if (err) throw(err);
-      res.json({ id: image._id, data: svg });
-    });
-  })
+    if (err) throw('Error gettting image from DB:', err);
+    makeSVG(image.url)
+      .then((svg) => res.json({ id: image._id, url: svg }))
+      .catch((err) => console.log(err));
+  });
 }
 
 module.exports = { addImage, getImages, processImages, }
