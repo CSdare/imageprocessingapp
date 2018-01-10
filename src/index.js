@@ -3,9 +3,24 @@ import { render } from 'react-dom';
 import App from './components/App';
 import styles from './css/style.css';
 import runtime from 'serviceworker-webpack-plugin/lib/runtime';
-import Worker from 'worker-loader!../workers/webWorker.js';
+import Worker from '../workers/webWorker.js';
+import sepiaWorker from 'worker-loader!../workers/sepiaWorker.js';
 
-window.Buffer = Buffer;
+document.getElementById('sepiaButton').onclick = (event) => {
+  const canvas = document.createElement('canvas');
+  const image = document.getElementById('image');
+  canvas.width = image.width;
+  canvas.height = image.height;
+  let ctx = canvas.getContext('2d');
+  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+  const canvasData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const sepWorker = new sepiaWorker();
+  sepWorker.postMessage({ canvasData, id: image.id });
+  sepWorker.onmessage = (event) => {
+    ctx.putImageData(event.data.canvasData, 0, 0);
+    image.setAttribute('src', canvas.toDataURL('image/png'));
+  };
+}
 
 render(<App />, document.getElementById('root'));
 

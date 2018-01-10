@@ -26,6 +26,7 @@
     "mongoose": "^5.0.0-rc1",
     "node-libs-browser": "^2.1.0",
     "potrace": "^2.1.1",
+    "potrace-js": "0.0.6",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "systeminformation": "^3.33.12"
