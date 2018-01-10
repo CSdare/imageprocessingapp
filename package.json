@@ -29,7 +29,8 @@
     "potrace-js": "0.0.6",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
-    "systeminformation": "^3.33.12"
+    "systeminformation": "^3.33.12",
+    "ws": "^4.0.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

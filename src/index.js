@@ -24,6 +24,39 @@ document.getElementById('sepiaButton').onclick = (event) => {
 
 render(<App />, document.getElementById('root'));
 
+//- SEPIA IMAGE CONVERSION -------------------------------------------------//
+const convertImageToCanvas = (image) => {
+  var canvas = document.createElement("canvas");
+	canvas.width = image.width;
+	canvas.height = image.height;
+  canvas.getContext("2d").drawImage(image, 0, 0);
+  dogeDiv.appendChild(canvas);
+	// return canvas;
+}
+
+const dogeDiv = document.getElementById('doge');
+const dogePic = document.getElementById('doge-pic');
+const dogeButton = document.getElementById('doge-button').addEventListener('click', () => convertImageToCanvas(dogePic));
+//--------------------------------------------------------------------------//
+
+//- WEBSOCKET STUFF --------------------------------------------------------//
+window.addEventListener('load', () => {
+  const socket = new WebSocket('ws://192.168.0.70:9000');
+  socket.onopen = () => {
+    const info = {
+      userAgent: navigator.userAgent,
+      vendor: navigator.vendor,
+      hardwareConcurrency: navigator.hardwareConcurrency,
+      platform: navigator.platform,
+      connection: JSON.stringify(navigator.connection),
+    };
+    socket.send(JSON.stringify(info));
+  };
+  socket.onmessage = (e) => {
+    console.log(e.data);
+  };
+});
+//------------------------------------------------------------------------//
 
 if ('serviceWorker' in navigator) {
   runtime.register().then(reg => {
