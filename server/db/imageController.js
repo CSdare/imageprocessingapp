@@ -20,7 +20,7 @@ const processImages = (req, res) => {
   Image.findOne({ _id: req.params.id }, (err, image) => {
     if (err) throw('Error gettting image from DB:', err);
     makeSVG(image.url)
-      .then((svg) => res.json({ id: image._id, url: svg }))
+      .then((svg) => res.json({ _id: image._id, url: svg }))
       .catch((err) => console.log(err));
   });
 }
