@@ -1,8 +1,6 @@
 const potrace = require('potrace');
 const convert = require('btoa');
 
-if (process.browser) self.Buffer = Buffer;
-
 const makeSVG = (url) => {
   return new Promise((resolve, reject) => {
     potrace.trace(url, (err, svg) => {

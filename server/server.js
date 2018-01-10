@@ -2,6 +2,22 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const WebSocket = require('ws');
+
+
+//-- WEBSOCKET -----------------------------------------------------//
+var server = new WebSocket.Server({ port: 9000 });
+
+server.on('connection', (ws) => {
+  const connectionTime = Date.now();
+  ws.on('message', (message) => {
+    const responseTime = Date.now();
+    const info = JSON.parse(message);
+    console.log(info);
+    console.log('Response time: %s', responseTime - connectionTime);
+  });
+});
+//-----------------------------------------------------------------//
 
 const imageController = require('./db/imageController');
 
