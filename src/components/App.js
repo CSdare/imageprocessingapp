@@ -3,7 +3,6 @@ import URLForm from './URLForm';
 import FileUpload from './FileUpload';
 import Process from './Process';
 import ImagesContainer from './ImagesContainer';
-import svgWorker from 'worker-loader!../../workers/svgWorker.js';
 
 class App extends React.Component {
   constructor() {
@@ -15,6 +14,7 @@ class App extends React.Component {
     this.addImageToDB = this.addImageToDB.bind(this);
     this.processImages = this.processImages.bind(this);
     this.processImagesWorker = this.processImagesWorker.bind(this);
+    this.setImageState = this.setImageState.bind(this);
   }
 
   getImagesFromDB() {
@@ -36,18 +36,20 @@ class App extends React.Component {
       });
   }
 
+  setImageState(svg) {
+    this.setState((prevState) => {
+      const index = prevState.images.findIndex(image => image._id === svg._id);
+      const images = prevState.images.slice();
+      images.splice(index, 1, { _id: svg.id, url: svg.url })
+      return { images };
+    })
+  }
+
   processImages() {
     this.state.images.forEach(image => {
       fetch(`/process/${image._id}`)
       .then(res => res.json())
-      .then(svg => {
-        this.setState((prevState) => {
-          const index = prevState.images.findIndex(image => image._id === svg.id);
-          const images = prevState.images.slice();
-          images.splice(index, 1, { _id: svg.id, url: svg.url })
-          return { images };
-        });
-      })
+      .then(svg => this.setImageState(svg))
       .catch(err => console.error('Error convering image:', err));
     });
   }
@@ -57,7 +59,8 @@ class App extends React.Component {
     const images = this.state.images.slice();
     images.forEach(image => {
       worker.postMessage(image);
-    }); 
+    });
+    worker.onmessage = e => this.setImageState({ _id: e.data._id, url: e.data.url });
   }
 
   componentDidMount() {
