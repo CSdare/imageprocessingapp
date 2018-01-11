@@ -10,12 +10,15 @@ var server = new WebSocket.Server({ port: 9000 });
 
 server.on('connection', (ws) => {
   const connectionTime = Date.now();
+  let connectionInfo;
   ws.on('message', (message) => {
     const responseTime = Date.now();
-    const info = JSON.parse(message);
-    console.log(info);
-    console.log('Response time: %s', responseTime - connectionTime);
+    const pingTime = responseTime - connectionTime;
+    connectionInfo = JSON.parse(message);
+    connectionInfo.pingTime = pingTime;
+    ws.send(JSON.stringify({ connectionInfo }));
   });
+  ws.on('close', () => console.log(connectionInfo, '---- WEBSOCKET CLOSED ----'));
 });
 //-----------------------------------------------------------------//
 
