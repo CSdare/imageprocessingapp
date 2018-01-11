@@ -28,19 +28,23 @@ render(<App />, document.getElementById('root'));
 
 //- WEBSOCKET STUFF --------------------------------------------------------//
 window.addEventListener('load', () => {
-  const socket = new WebSocket('ws://192.168.0.70:9000');
-  socket.onopen = () => {
+  const socket = new WebSocket('ws://192.168.0.98:9000');
+  socket.onopen = () => {    
     const info = {
       userAgent: navigator.userAgent,
       vendor: navigator.vendor,
       hardwareConcurrency: navigator.hardwareConcurrency,
       platform: navigator.platform,
-      connection: JSON.stringify(navigator.connection),
     };
+    if (navigator.connection) {
+      info.downlink = navigator.connection.downlink;
+      info.effectiveType = navigator.connection.effectiveType;
+    }
     socket.send(JSON.stringify(info));
   };
   socket.onmessage = (e) => {
     console.log(e.data);
+    socket.close();
   };
 });
 //------------------------------------------------------------------------//
