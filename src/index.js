@@ -3,41 +3,28 @@ import { render } from 'react-dom';
 import App from './components/App';
 import styles from './css/style.css';
 import runtime from 'serviceworker-webpack-plugin/lib/runtime';
-import Worker from '../workers/webWorker.js';
+import Worker from 'worker-loader!../workers/webWorker.js';
 import sepiaWorker from 'worker-loader!../workers/sepiaWorker.js';
 
-document.getElementById('sepiaButton').onclick = (event) => {
-  const canvas = document.createElement('canvas');
-  const image = document.getElementById('image');
-  canvas.width = image.width;
-  canvas.height = image.height;
-  let ctx = canvas.getContext('2d');
-  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-  const canvasData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const sepWorker = new sepiaWorker();
-  sepWorker.postMessage({ canvasData, id: image.id });
-  sepWorker.onmessage = (event) => {
-    ctx.putImageData(event.data.canvasData, 0, 0);
-    image.setAttribute('src', canvas.toDataURL('image/png'));
-  };
-}
+// leaving this as reference for the moment, will delete
+
+// document.getElementById('sepiaButton').onclick = (event) => {
+//   const canvas = document.createElement('canvas');
+//   const image = document.getElementById('image');
+//   canvas.width = image.width;
+//   canvas.height = image.height;
+//   let ctx = canvas.getContext('2d');
+//   ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+//   const canvasData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+//   const sepWorker = new sepiaWorker();
+//   sepWorker.postMessage({ canvasData, _id: image.id });
+//   sepWorker.onmessage = (event) => {
+//     ctx.putImageData(event.data.canvasData, 0, 0);
+//     image.setAttribute('src', canvas.toDataURL('image/png'));
+//   };
+// }
 
 render(<App />, document.getElementById('root'));
-
-//- SEPIA IMAGE CONVERSION -------------------------------------------------//
-const convertImageToCanvas = (image) => {
-  var canvas = document.createElement("canvas");
-	canvas.width = image.width;
-	canvas.height = image.height;
-  canvas.getContext("2d").drawImage(image, 0, 0);
-  dogeDiv.appendChild(canvas);
-	// return canvas;
-}
-
-const dogeDiv = document.getElementById('doge');
-const dogePic = document.getElementById('doge-pic');
-const dogeButton = document.getElementById('doge-button').addEventListener('click', () => convertImageToCanvas(dogePic));
-//--------------------------------------------------------------------------//
 
 //- WEBSOCKET STUFF --------------------------------------------------------//
 window.addEventListener('load', () => {

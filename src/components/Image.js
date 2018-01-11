@@ -9,7 +9,7 @@ const replaceImage = (event) => {
 const Image = (props) => {
   return (
     <div id={props.id} className="image">
-      <img onError={replaceImage} src={props.url} />
+      <img onError={replaceImage} src={props.url} crossOrigin="Anonymous" />
     </div>
   );
 }
