@@ -4,23 +4,28 @@ import FileUpload from './FileUpload';
 import Process from './Process';
 import ImagesContainer from './ImagesContainer';
 import SepiaWorker from 'worker-loader!../../workers/sepiaWorker.js';
-import { Pool, WorkerThread, WorkerTask } from '../../pool/pool';
+import { Pool, WorkerTask } from '../../pool/pool';
 import { processSepia } from '../../functions/tools';
 
 let threads = 4; // this variable will be manipulated by optimization calculation
 const pool = new Pool(threads);
 
-const convertImageToCanvas = (uri) => {
-  const canvas = document.createElement('canvas');
+const convertImageToCanvas = (uri, callback) => { 
   const image = document.createElement('img');
   image.src = uri;
-  canvas.width = image.width;
-  canvas.height = image.height;
-  const context = canvas.getContext('2d');
-  context.drawImage(image, 0, 0, canvas.width, canvas.height);
-  const imageDataObj = context.getImageData(0, 0, Math.floor(canvas.width), Math.floor(canvas.height));
-  const length = imageDataObj.width * imageDataObj.height * 4;
-  return { canvas, context, imageDataObj, length };
+  image.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext('2d');
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const imageDataObj = context.getImageData(0, 0, canvas.width, canvas.height);
+    const length = imageDataObj.width * imageDataObj.height * 4;
+    callback(null, { canvas, context, imageDataObj, length });
+  }
+  image.onerror = (err) => {
+    callback(err);
+  }
 };
 
 class App extends React.Component {
@@ -64,14 +69,13 @@ class App extends React.Component {
     })
   }
   
-  // old POTRACE code - will delete
-  //
   processImagesServer() {
-    this.state.images.forEach(image => {
+    const imagesToProcess = this.state.images.slice();
+    imagesToProcess.forEach(image => {
       fetch(`/process/${image._id}`)
-      .then(res => res.json())
-      .then(svg => this.setImageState(svg))
-      .catch(err => console.error('Error convering image:', err));
+        .then(res => res.json())
+        .then(svg => this.setImageState(svg))
+        .catch(err => console.error('Error convering image:', err));
     });
   }
 
@@ -92,25 +96,27 @@ class App extends React.Component {
     pool.init(); // if we put this at the top of the page, process only works once
     const images = this.state.images.slice();
     images.forEach(image => {
-      const canvasObj = convertImageToCanvas(image.url);
+      convertImageToCanvas(image.url, (err, canvasObj) => {
+        if (err) return console.error(err);
 
-      // need to put the workerSepiaCallback here so that is has access to the tempCanvas/context
-      const workerSepiaCallback = (event) =>  {
-        canvasObj.context.putImageData(event.data.canvasData, 0, 0);
-        const newURL = canvasObj.canvas.toDataURL('image/png');
-        this.setState((prevState) => {
-          const index = prevState.images.findIndex(image => image._id === event.data._id);
-          const images = prevState.images.slice();
-          images.splice(index, 1, { _id: event.data._id, url: newURL });
-          return { images };
-        })
-      }
+        // need to put the workerSepiaCallback here so that is has access to the tempCanvas/context
+        const workerSepiaCallback = (event) =>  {
+          canvasObj.context.putImageData(event.data.canvasData, 0, 0);
+          const newURL = canvasObj.canvas.toDataURL('image/png');
+          this.setState((prevState) => {
+            const index = prevState.images.findIndex(image => image._id === event.data._id);
+            const images = prevState.images.slice();
+            images.splice(index, 1, { _id: event.data._id, url: newURL });
+            return { images };
+          })
+        };
 
-      // creating a task and sending it to the pool
-      const task = new WorkerTask(SepiaWorker, workerSepiaCallback, { canvasData: canvasObj.imageDataObj, _id: image._id });
-      pool.addWorkerTask(task);
-      console.log('# of tasks in queue: ', pool.taskQueue.length);
-      console.log('# of workers in queue: ', pool.workerQueue.length);
+        // creating a task and sending it to the pool
+        const task = new WorkerTask(SepiaWorker, workerSepiaCallback, { canvasData: canvasObj.imageDataObj, _id: image._id });
+        pool.addWorkerTask(task);
+        console.log('# of tasks in queue: ', pool.taskQueue.length);
+        console.log('# of workers in queue: ', pool.workerQueue.length);
+      }); 
     });
   }
 
