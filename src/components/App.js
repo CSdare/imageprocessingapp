@@ -10,6 +10,19 @@ import { processSepia } from '../../functions/tools';
 let threads = 4; // this variable will be manipulated by optimization calculation
 const pool = new Pool(threads);
 
+const convertImageToCanvas = (uri) => {
+  const canvas = document.createElement('canvas');
+  const image = document.createElement('img');
+  image.src = uri;
+  canvas.width = image.width;
+  canvas.height = image.height;
+  const context = canvas.getContext('2d');
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  const imageDataObj = context.getImageData(0, 0, Math.floor(canvas.width), Math.floor(canvas.height));
+  const length = imageDataObj.width * imageDataObj.height * 4;
+  return { canvas, context, imageDataObj, length };
+};
+
 class App extends React.Component {
   constructor() {
     super();
@@ -18,7 +31,7 @@ class App extends React.Component {
     };
     this.getImagesFromDB = this.getImagesFromDB.bind(this);
     this.addImageToDB = this.addImageToDB.bind(this);
-    // this.processImages = this.processImages.bind(this);
+    this.processImagesServer = this.processImagesServer.bind(this);
     this.processImagesWorker = this.processImagesWorker.bind(this);
     this.processImagesSingle = this.processImagesSingle.bind(this);
     this.setImageState = this.setImageState.bind(this);
@@ -53,31 +66,23 @@ class App extends React.Component {
   
   // old POTRACE code - will delete
   //
-  // processImages() {
-  //   this.state.images.forEach(image => {
-  //     fetch(`/process/${image._id}`)
-  //     .then(res => res.json())
-  //     .then(svg => this.setImageState(svg))
-  //     .catch(err => console.error('Error convering image:', err));
-  //   });
-  // }
+  processImagesServer() {
+    this.state.images.forEach(image => {
+      fetch(`/process/${image._id}`)
+      .then(res => res.json())
+      .then(svg => this.setImageState(svg))
+      .catch(err => console.error('Error convering image:', err));
+    });
+  }
 
   processImagesSingle() {
     const imagesToProcess = this.state.images.slice();
     const newImages = [];
     imagesToProcess.forEach(image => {
-      const tempCanvas = document.createElement('canvas');
-      const tempImage = document.createElement('IMG');
-      tempImage.src = image.url;
-      tempCanvas.width = tempImage.width;
-      tempCanvas.height = tempImage.height;
-      const context = tempCanvas.getContext('2d');
-      context.drawImage(tempImage, 0, 0, tempCanvas.width, tempCanvas.height);
-      const canvasData = context.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-      const len = canvasData.height * canvasData.width * 4;
-      processSepia(canvasData.data, len);
-      context.putImageData(canvasData, 0, 0);
-      const newURL = tempCanvas.toDataURL('image/png'); // next: test whether tempCanvas.toDataURL changes before and after processSepia
+      const canvasObj = convertImageToCanvas(image.url);
+      processSepia(canvasObj.imageDataObj.data, canvasObj.length);
+      canvasObj.context.putImageData(canvasObj.imageDataObj, 0, 0);
+      const newURL = canvasObj.canvas.toDataURL('image/png');
       newImages.push({ _id: image._id, url: newURL });
       this.setImageState(newImages);
     });
@@ -87,19 +92,12 @@ class App extends React.Component {
     pool.init(); // if we put this at the top of the page, process only works once
     const images = this.state.images.slice();
     images.forEach(image => {
-      const tempCanvas = document.createElement('canvas');
-      const tempImage = document.createElement('IMG');
-      tempImage.src = image.url;
-      tempCanvas.width = tempImage.width;
-      tempCanvas.height = tempImage.height;
-      const context = tempCanvas.getContext('2d');
-      context.drawImage(tempImage, 0, 0, tempCanvas.width, tempCanvas.height);
-      const canvasData = context.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+      const canvasObj = convertImageToCanvas(image.url);
 
-// need to put the workerSepiaCallback here so that is has access to the tempCanvas/context
+      // need to put the workerSepiaCallback here so that is has access to the tempCanvas/context
       const workerSepiaCallback = (event) =>  {
-        context.putImageData(event.data.canvasData, 0, 0);
-        const newURL = tempCanvas.toDataURL('image/png');
+        canvasObj.context.putImageData(event.data.canvasData, 0, 0);
+        const newURL = canvasObj.canvas.toDataURL('image/png');
         this.setState((prevState) => {
           const index = prevState.images.findIndex(image => image._id === event.data._id);
           const images = prevState.images.slice();
@@ -108,8 +106,8 @@ class App extends React.Component {
         })
       }
 
-// creating a task and sending it to the pool
-      const task = new WorkerTask(SepiaWorker, workerSepiaCallback, { canvasData, _id: image._id });
+      // creating a task and sending it to the pool
+      const task = new WorkerTask(SepiaWorker, workerSepiaCallback, { canvasData: canvasObj.imageDataObj, _id: image._id });
       pool.addWorkerTask(task);
       console.log('# of tasks in queue: ', pool.taskQueue.length);
       console.log('# of workers in queue: ', pool.workerQueue.length);
