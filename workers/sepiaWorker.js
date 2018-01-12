@@ -1,4 +1,4 @@
-import { noise, colorDistance, processSepia } from '../functions/tools.js';
+import { processSepia } from '../functions/tools.js';
 
 onmessage = (e) => {
   const len = e.data.canvasData.height * e.data.canvasData.width * 4;
