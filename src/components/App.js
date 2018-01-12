@@ -7,7 +7,7 @@ import SepiaWorker from 'worker-loader!../../workers/sepiaWorker.js';
 import { Pool, WorkerThread, WorkerTask } from '../../pool/pool';
 import { processSepia } from '../../functions/tools';
 
-let threads = 4; // this variable will be manipulated by optimization calculation
+let threads = navigator.hardwareConcurrency || 4; // this variable will be manipulated by optimization calculation
 const pool = new Pool(threads);
 
 const convertImageToCanvas = (uri) => {
@@ -76,6 +76,7 @@ class App extends React.Component {
   }
 
   processImagesSingle() {
+    const time = Date.now();
     const imagesToProcess = this.state.images.slice();
     const newImages = [];
     imagesToProcess.forEach(image => {
@@ -86,16 +87,20 @@ class App extends React.Component {
       newImages.push({ _id: image._id, url: newURL });
       this.setImageState(newImages);
     });
+    console.log('single thread image process time:', Date.now() - time);
   }
 
   processImagesWorker() {
+    const time = Date.now();
     pool.init(); // if we put this at the top of the page, process only works once
     const images = this.state.images.slice();
+    let counter = 0;
     images.forEach(image => {
       const canvasObj = convertImageToCanvas(image.url);
 
       // need to put the workerSepiaCallback here so that is has access to the tempCanvas/context
       const workerSepiaCallback = (event) =>  {
+        counter++;
         canvasObj.context.putImageData(event.data.canvasData, 0, 0);
         const newURL = canvasObj.canvas.toDataURL('image/png');
         this.setState((prevState) => {
@@ -103,7 +108,8 @@ class App extends React.Component {
           const images = prevState.images.slice();
           images.splice(index, 1, { _id: event.data._id, url: newURL });
           return { images };
-        })
+        });
+        if (counter === images.length) console.log(`${pool.poolSize} threads image process time:`, Date.now() - time);
       }
 
       // creating a task and sending it to the pool
@@ -124,7 +130,7 @@ class App extends React.Component {
         <h1>D.A.R.E. Images</h1>
         <URLForm addImage={this.addImageToDB} />
         <FileUpload addImage={this.addImageToDB} />
-        <Process processImages={this.processImages} processImagesWorker={this.processImagesWorker} processImagesSingle={this.processImagesSingle} />
+        <Process getImagesFromDB={this.getImagesFromDB} processImages={this.processImages} processImagesWorker={this.processImagesWorker} processImagesSingle={this.processImagesSingle} />
         <ImagesContainer images={this.state.images} />
       </div>
     );
