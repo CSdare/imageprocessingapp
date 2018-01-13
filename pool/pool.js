@@ -74,4 +74,4 @@ function WorkerTask(type, callback, msg) {
   this.startMessage = msg;
 };
 
-module.exports = { Pool, WorkerThread, WorkerTask };
+module.exports = { Pool, WorkerTask };

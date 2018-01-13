@@ -4,14 +4,14 @@ body {
   font-family: 'Helvetica Neue', sans-serif;
 }
 
-.image-form,
+.spec-display,
 .file-form,
 .process,
 h1 {
   padding-left: 10px;
 }
 
-.image-form {
+.spec-display {
   background-color: lightgray;
 }
 
@@ -24,11 +24,21 @@ h1 {
   padding: 6px;
 }
 
-.image-form input,
+.spec-display input,
 .file-form input {
   margin: 6px;
   width: 50%;
   max-width: 500px;
+}
+
+.spec-display ul {
+  font-size: 0.7rem;
+  padding: 6px 0;
+  margin: 0;
+}
+
+.spec-display li {
+  list-style: none;
 }
 
 .image-container {

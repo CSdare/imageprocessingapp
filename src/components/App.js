@@ -1,5 +1,5 @@
 import React from 'react';
-import URLForm from './URLForm';
+import SpecDisplay from './SpecDisplay';
 import FileUpload from './FileUpload';
 import Process from './Process';
 import ImagesContainer from './ImagesContainer';
@@ -127,7 +127,7 @@ class App extends React.Component {
     return (
       <div className="container">
         <h1>D.A.R.E. Images</h1>
-        <URLForm addImage={this.addImageToDB} />
+        <SpecDisplay />
         <FileUpload addImage={this.addImageToDB} />
         <Process 
           processImagesServer={this.processImagesServer} 
