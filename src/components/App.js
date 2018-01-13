@@ -5,28 +5,11 @@ import Process from './Process';
 import ImagesContainer from './ImagesContainer';
 import SepiaWorker from 'worker-loader!../../workers/sepiaWorker.js';
 import { Pool, WorkerTask } from '../../pool/pool';
-import { processSepia } from '../../functions/tools';
+import convertImageToCanvas from '../../functions/convertImageToCanvas';
+import processSepia from '../../functions/tools';
 
 let threads = 4; // this variable will be manipulated by optimization calculation
 const pool = new Pool(threads);
-
-const convertImageToCanvas = (uri, callback) => { 
-  const image = document.createElement('img');
-  image.src = uri;
-  image.onload = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height = image.height;
-    const context = canvas.getContext('2d');
-    context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    const imageDataObj = context.getImageData(0, 0, canvas.width, canvas.height);
-    const length = imageDataObj.width * imageDataObj.height * 4;
-    callback(null, { canvas, context, imageDataObj, length });
-  }
-  image.onerror = (err) => {
-    callback(err);
-  }
-};
 
 class App extends React.Component {
   constructor() {
@@ -36,10 +19,10 @@ class App extends React.Component {
     };
     this.getImagesFromDB = this.getImagesFromDB.bind(this);
     this.addImageToDB = this.addImageToDB.bind(this);
+    this.setImageState = this.setImageState.bind(this);
     this.processImagesServer = this.processImagesServer.bind(this);
     this.processImagesWorker = this.processImagesWorker.bind(this);
     this.processImagesSingle = this.processImagesSingle.bind(this);
-    this.setImageState = this.setImageState.bind(this);
   }
 
   getImagesFromDB() {
@@ -72,9 +55,19 @@ class App extends React.Component {
   processImagesServer() {
     const imagesToProcess = this.state.images.slice();
     imagesToProcess.forEach(image => {
-      fetch(`/process/${image._id}`)
-        .then(res => res.json())
-        .then(svg => this.setImageState(svg))
+      fetch(`/process`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ _id: image._id, url: image.url })
+      }).then(res => res.json())
+        .then(data => {
+          this.setState((prevState) => {
+            const index = prevState.images.findIndex(image => image._id === data._id);
+            const images = prevState.images.slice();
+            images.splice(index, 1, { _id: data._id, url: data.url });
+            return { images };
+          })
+        })
         .catch(err => console.error('Error convering image:', err));
     });
   }
@@ -83,12 +76,13 @@ class App extends React.Component {
     const imagesToProcess = this.state.images.slice();
     const newImages = [];
     imagesToProcess.forEach(image => {
-      const canvasObj = convertImageToCanvas(image.url);
-      processSepia(canvasObj.imageDataObj.data, canvasObj.length);
-      canvasObj.context.putImageData(canvasObj.imageDataObj, 0, 0);
-      const newURL = canvasObj.canvas.toDataURL('image/png');
-      newImages.push({ _id: image._id, url: newURL });
-      this.setImageState(newImages);
+      convertImageToCanvas(image.url, (err, canvasObj) => {
+        processSepia(canvasObj.imageDataObj.data, canvasObj.length);
+        canvasObj.context.putImageData(canvasObj.imageDataObj, 0, 0);
+        const newURL = canvasObj.canvas.toDataURL('image/png');
+        newImages.push({ _id: image._id, url: newURL });
+        this.setImageState(newImages);
+      });
     });
   }
 
@@ -130,7 +124,11 @@ class App extends React.Component {
         <h1>D.A.R.E. Images</h1>
         <URLForm addImage={this.addImageToDB} />
         <FileUpload addImage={this.addImageToDB} />
-        <Process processImages={this.processImages} processImagesWorker={this.processImagesWorker} processImagesSingle={this.processImagesSingle} />
+        <Process 
+          processImagesServer={this.processImagesServer} 
+          processImagesWorker={this.processImagesWorker} 
+          processImagesSingle={this.processImagesSingle} 
+        />
         <ImagesContainer images={this.state.images} />
       </div>
     );
