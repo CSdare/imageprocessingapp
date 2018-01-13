@@ -1,28 +1,40 @@
 const mongoose = require('mongoose');
-const Image = require('./mongodb').Image;
-const { makeSVG } = require('../../functions/makeSVG')
+const ImageDB = require('./mongodb').Image;
+const Canvas = require('canvas');
+const processSepia = require('../../functions/tools');
 
 const addImage = (req, res) => {
-  Image.create({ url: req.body.url }, (err, image) => {
+  ImageDB.create({ url: req.body.url }, (err, image) => {
     if (err) throw err;
     res.json(image);
   });
 }
 
 const getImages = (req, res) => {
-  Image.find((err, images) => {
+  ImageDB.find((err, images) => {
     if (err) throw err;
     res.json(images);
   });
 }
 
-const processImages = (req, res) => {
-  Image.findOne({ _id: req.params.id }, (err, image) => {
-    if (err) throw('Error gettting image from DB:', err);
-    makeSVG(image.url)
-      .then((svg) => res.json({ _id: image._id, url: svg }))
-      .catch((err) => console.log(err));
-  });
+const processImage = (req, res) => {
+  const Image = Canvas.Image;
+  const img = new Image();
+  img.src = req.body.url;
+
+  const canvas = new Canvas(img.width, img.height);
+  const context = canvas.getContext('2d');
+  context.drawImage(img, 0, 0, img.width, img.height);
+
+  const imageDataObj = context.getImageData(0, 0, img.width, img.height);
+
+  processSepia(imageDataObj.data, img.width * img.height * 4);
+
+  context.putImageData(imageDataObj, 0, 0);
+
+  const newURL = canvas.toDataURL('image/png');
+
+  res.json({ _id: req.body._id, url: newURL });
 }
 
-module.exports = { addImage, getImages, processImages, }
+module.exports = { addImage, getImages, processImage, }
