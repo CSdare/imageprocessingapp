@@ -45,12 +45,6 @@ class App extends React.Component {
         this.setState({ images: [...this.state.images, data] });
       });
   }
-
-  setImageState(newImages) {
-    this.setState((prevState) => {
-      return { images: newImages };
-    })
-  }
   
   processImagesServer() {
     const imagesToProcess = this.state.images.slice();
@@ -72,8 +66,16 @@ class App extends React.Component {
     });
   }
 
+  setImageState(newImage) {
+    this.setState((prevState) => {
+      const index = prevState.images.findIndex(image => image._id === newImage._id);
+      const images = prevState.images.slice();
+      images.splice(index, 1, { _id: newImage._id, url: newImage.url });
+      return { images };
+    });
+  }
+
   processImagesSingle() {
-    const time = Date.now();
     const imagesToProcess = this.state.images.slice();
     const newImages = [];
     imagesToProcess.forEach(image => {
@@ -81,11 +83,9 @@ class App extends React.Component {
         processSepia(canvasObj.imageDataObj.data, canvasObj.length);
         canvasObj.context.putImageData(canvasObj.imageDataObj, 0, 0);
         const newURL = canvasObj.canvas.toDataURL('image/png');
-        newImages.push({ _id: image._id, url: newURL });
-        this.setImageState(newImages);
+        this.setImageState({ url: newURL, _id: image._id });
       });
     });
-    console.log('single thread image process time:', Date.now() - time);
   }
 
   processImagesWorker() {
