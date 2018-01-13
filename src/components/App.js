@@ -87,7 +87,7 @@ class App extends React.Component {
   }
 
   processImagesWorker() {
-    pool.init(); // if we put this at the top of the page, process only works once
+    pool.init(); // Initialize the pool every time we batch process images
     const images = this.state.images.slice();
     images.forEach(image => {
       convertImageToCanvas(image.url, (err, canvasObj) => {
