@@ -33,7 +33,7 @@ app.use(bodyParser.urlencoded({ limit: '16mb', extended: true }));
 
 app.get('/read', imageController.getImages);
 app.post('/create', imageController.addImage);
-app.get('/process/:id', imageController.processImages);
+app.post('/process', imageController.processImage);
 
 mongoose.connect(`mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@ds237947.mlab.com:37947/imagesdb`);
 mongoose.connection.once('open', () => {

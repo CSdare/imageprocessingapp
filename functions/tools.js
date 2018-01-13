@@ -19,4 +19,4 @@ const processSepia = (binaryData, l) => {
   }
 };
 
-module.exports = { noise, colorDistance, processSepia };
+module.exports = processSepia;
