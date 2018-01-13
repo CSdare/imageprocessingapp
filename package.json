@@ -6,7 +6,8 @@
   "scripts": {
     "test": "test",
     "start": "node server/server.js",
-    "build": "webpack -w"
+    "build": "webpack -w",
+    "postinstall": "npm run build"
   },
   "repository": {
     "type": "git",
