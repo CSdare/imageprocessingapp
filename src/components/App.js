@@ -8,7 +8,7 @@ import { Pool, WorkerTask } from '../../pool/pool';
 import convertImageToCanvas from '../../functions/convertImageToCanvas';
 import processSepia from '../../functions/tools';
 
-let threads = 4; // this variable will be manipulated by optimization calculation
+let threads = navigator.hardwareConcurrency || 4; // this variable will be manipulated by optimization calculation
 const pool = new Pool(threads);
 
 class App extends React.Component {
@@ -73,6 +73,7 @@ class App extends React.Component {
   }
 
   processImagesSingle() {
+    const time = Date.now();
     const imagesToProcess = this.state.images.slice();
     const newImages = [];
     imagesToProcess.forEach(image => {
@@ -84,11 +85,14 @@ class App extends React.Component {
         this.setImageState(newImages);
       });
     });
+    console.log('single thread image process time:', Date.now() - time);
   }
 
   processImagesWorker() {
     pool.init(); // Initialize the pool every time we batch process images
+    const time = Date.now();
     const images = this.state.images.slice();
+    let counter = 0;
     images.forEach(image => {
       convertImageToCanvas(image.url, (err, canvasObj) => {
         if (err) return console.error(err);
@@ -104,6 +108,7 @@ class App extends React.Component {
             return { images };
           })
         };
+
 
         // creating a task and sending it to the pool
         const task = new WorkerTask(SepiaWorker, workerSepiaCallback, { canvasData: canvasObj.imageDataObj, _id: image._id });
@@ -127,7 +132,8 @@ class App extends React.Component {
         <Process 
           processImagesServer={this.processImagesServer} 
           processImagesWorker={this.processImagesWorker} 
-          processImagesSingle={this.processImagesSingle} 
+          processImagesSingle={this.processImagesSingle}
+          getImagesFromDB={this.getImagesFromDB}
         />
         <ImagesContainer images={this.state.images} />
       </div>

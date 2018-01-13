@@ -40,4 +40,4 @@ mongoose.connection.once('open', () => {
   console.log('connected with MLab database')
 });
 
-app.listen(port);
+app.listen(process.env.PORT || port);
