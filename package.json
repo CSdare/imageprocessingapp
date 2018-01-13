@@ -8,7 +8,7 @@
     "heroku-postbuild": "export NPM_CONFIG_PRODUCTION=true; export NODE_ENV=production;",
     "test": "test",
     "start": "node server/server.js",
-    "build": "webpack -w",
+    "build": "webpack",
     "postinstall": "npm run build"
   },
   "repository": {
