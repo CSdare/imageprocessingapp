@@ -7,6 +7,7 @@ const Process = (props) => {
       <button onClick={props.processImagesWorker}>Worker Process Images</button>
       <button onClick={props.processImagesSingle}>Single Thread Process Images</button>
       <button onClick={props.getImagesFromDB}>Reload Images</button>
+      <button onClick={props.runOptimization}>Optimize!</button>
     </div>
   );
 };
