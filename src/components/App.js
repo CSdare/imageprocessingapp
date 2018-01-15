@@ -9,7 +9,7 @@ import convertImageToCanvas from '../../functions/convertImageToCanvas';
 import processSepia from '../../functions/tools';
 
 let threads = navigator.hardwareConcurrency || 4; // this variable will be manipulated by optimization calculation
-const pool = new Pool(threads);
+let pool = new Pool(threads);
 
 class App extends React.Component {
   constructor() {
@@ -23,6 +23,9 @@ class App extends React.Component {
     this.processImagesServer = this.processImagesServer.bind(this);
     this.processImagesWorker = this.processImagesWorker.bind(this);
     this.processImagesSingle = this.processImagesSingle.bind(this);
+    this.pathOfLeastResistance = this.pathOfLeastResistance.bind(this);
+    //optimization + path of least resistance...
+    this.runOptimization = this.runOptimization.bind(this);
   }
 
   getImagesFromDB() {
@@ -119,9 +122,90 @@ class App extends React.Component {
     });
   }
 
+  //function to execute most performant process based on the results of 
+  //the runOptimization() metric...
+  pathOfLeastResistance(optimalProcess) {
+    //path for when server processing is most efficient method
+    if (optimalProcess.processLocation === "server") this.processImagesServer();
+    //path for when client processing is most efficient method
+    else if (optimalProcess.processLocation === "client") {
+      pool = new Pool(optimalProcess.optimalThreads);
+      this.processImagesWorker();
+    } else return alert("Not enough client information to optimize!");
+  }
+
+  //placeholder function to simulate calculation of most performant 
+  //process based on client hardware and network information
+  runOptimization() {
+    let userAgent = navigator.userAgent;
+    let operatingSystem = navigator.oscpu;
+
+    let optimalProcess = {
+      processLocation: null,
+      optimalThreads: null,
+      dynamicPing: 150,
+      browser: null,
+      operatingSystem: operatingSystem,
+      missingDeviceInfo: null
+    };
+
+    function browserCheck(userAgent) {
+      let browserOptions = ['Chrome', 'Firefox', 'Safari', 'Opera', 'IE'];
+      let firstIndex = Infinity;
+      let browser = null;
+
+      for (let i = 0; i < browserOptions.length; i++) {
+        if (userAgent.includes(browserOptions[i])) {
+          let index = userAgent.indexOf(browserOptions[i]);
+
+          if (index >= 0 && index < firstIndex) {
+            firstIndex = index;
+            browser = browserOptions[i];
+          }
+        }
+      }
+      optimalProcess.browser = browser;
+    }
+    
+    browserCheck(userAgent);
+
+    function threadCheck(threads, browser) {
+      if (browser === 'Chrome') {
+        if (threads > 14) optimalProcess.optimalThreads = 14;
+        else optimalProcess.optimalThreads = threads;
+      }
+      else if (browser === 'Firefox' || browser === 'Safari') {
+        if (threads > 12) optimalProcess.optimalThreads = 12;
+        else optimalProcess.optimalThreads = threads;
+      }
+      else if (browser === 'Opera') {
+        if (threads > 10) optimalProcess.optimalThreads = 10;
+        else optimalProcess.optimalThreads = threads
+      }
+      else optimalProcess.optimalThreads = 4;
+    }
+
+    function applymetric(optimalProcess) {
+      if (optimalProcess.dynamicPing > 100) {
+        optimalProcess.processLocation = 'client';
+        if (optimalProcess.browser !== 'Chrome' && optimalProcess.browser !== 'Firefox' && optimalProcess.browser !== 'Safari') {
+          optimalProcess.processLocation = 'server';
+        }
+      }
+      else optimalProcess.processLocation = 'server';
+    }
+
+    threadCheck(threads, optimalProcess.browser);
+    // dynamicPing(pingsize);
+    applymetric(optimalProcess);
+    this.pathOfLeastResistance(optimalProcess);
+    console.log('will be processed here: ', optimalProcess.processLocation);
+    return optimalProcess;
+  }
+
   componentDidMount() {
     this.getImagesFromDB(); 
-   }
+  }
 
   render() {
     return (
@@ -130,6 +214,7 @@ class App extends React.Component {
         <SpecDisplay />
         <FileUpload addImage={this.addImageToDB} />
         <Process 
+          runOptimization={this.runOptimization}
           processImagesServer={this.processImagesServer} 
           processImagesWorker={this.processImagesWorker} 
           processImagesSingle={this.processImagesSingle}
