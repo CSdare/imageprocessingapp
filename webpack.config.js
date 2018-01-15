@@ -19,6 +19,9 @@ module.exports = {
         loader: "babel-loader",
       },
       {
+        test: /\.svg$/, loader: 'file-loader',
+      },
+      {
         test: /\.worker\.js$/,
         use: { loader: 'worker-loader' },
       },
