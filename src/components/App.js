@@ -1,4 +1,5 @@
 import React from 'react';
+import Header from './Header';
 import SpecDisplay from './SpecDisplay';
 import FileUpload from './FileUpload';
 import Process from './Process';
@@ -210,9 +211,7 @@ class App extends React.Component {
   render() {
     return (
       <div className="container">
-        <h1>D.A.R.E. Images</h1>
-        <SpecDisplay />
-        <FileUpload addImage={this.addImageToDB} />
+        <Header />
         <Process 
           runOptimization={this.runOptimization}
           processImagesServer={this.processImagesServer} 
@@ -220,7 +219,9 @@ class App extends React.Component {
           processImagesSingle={this.processImagesSingle}
           getImagesFromDB={this.getImagesFromDB}
         />
+        <FileUpload addImage={this.addImageToDB} />
         <ImagesContainer images={this.state.images} />
+        <SpecDisplay />
       </div>
     );
   }
